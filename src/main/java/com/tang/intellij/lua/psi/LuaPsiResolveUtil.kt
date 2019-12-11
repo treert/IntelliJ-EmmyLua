@@ -92,10 +92,6 @@ fun resolve(nameExpr: LuaNameExpr, context: SearchContext): PsiElement? {
     if (resolveResult == null || resolveResult is LuaNameExpr) {
         val refName = nameExpr.name
         val moduleName = nameExpr.moduleName ?: Constants.WORD_G
-        LuaClassMemberIndex.process(moduleName, refName, context, Processor {
-            resolveResult = it
-            false
-        })
 
         // 如果不是_G并且seeall了就再找一遍
         if(moduleName != Constants.WORD_G && nameExpr.moduleSeeAll) {
@@ -104,6 +100,11 @@ fun resolve(nameExpr: LuaNameExpr, context: SearchContext): PsiElement? {
                 false
             })
         }
+
+        LuaClassMemberIndex.process(moduleName, refName, context, Processor {
+            resolveResult = it
+            false
+        })
     }
 
     return resolveResult
@@ -118,10 +119,6 @@ fun multiResolve(ref: LuaNameExpr, context: SearchContext): Array<PsiElement> {
     } else {
         val refName = ref.name
         val module = ref.moduleName ?: Constants.WORD_G
-        LuaClassMemberIndex.process(module, refName, context, Processor {
-            list.add(it)
-            true
-        })
 
         // 如果不是_G并且seeall了就再找一遍
         if(module != Constants.WORD_G && ref.moduleSeeAll) {
@@ -130,6 +127,11 @@ fun multiResolve(ref: LuaNameExpr, context: SearchContext): Array<PsiElement> {
                 true
             })
         }
+
+        LuaClassMemberIndex.process(module, refName, context, Processor {
+            list.add(it)
+            true
+        })
     }
     return list.toTypedArray()
 }
