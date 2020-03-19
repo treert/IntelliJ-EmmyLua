@@ -105,6 +105,11 @@ class SearchContext private constructor(val project: Project) {
                 ret
             }
         }
+
+        fun invalidateCache(project: Project) {
+            var searchContext = get(project)
+            searchContext.invalidateInferCache()
+        }
     }
 
     /**
@@ -178,5 +183,9 @@ class SearchContext private constructor(val project: Project) {
 
     fun getTypeFromCache(psi: LuaTypeGuessable): ITy {
         return myInferCache.getOrElse(psi) { Ty.UNKNOWN }
+    }
+
+    fun invalidateInferCache() {
+        myInferCache.clear()
     }
 }
