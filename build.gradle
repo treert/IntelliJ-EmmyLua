@@ -49,4 +49,4 @@ versions.each { shortVer, cfg ->
     }
 }
 
-task buildAll(dependsOn: [build_171,build_172,build_182])
+task buildAll(dependsOn: [build_182])
