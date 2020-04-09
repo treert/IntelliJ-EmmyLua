@@ -37,6 +37,8 @@ import com.tang.intellij.lua.comment.psi.api.LuaComment
 import com.tang.intellij.lua.lang.LuaIcons
 import com.tang.intellij.lua.lang.type.LuaString
 import com.tang.intellij.lua.psi.impl.LuaLiteralExprImpl
+import com.tang.intellij.lua.psi.impl.LuaNameDefImpl
+import com.tang.intellij.lua.psi.impl.LuaNameExprImpl
 import com.tang.intellij.lua.psi.search.LuaShortNamesManager
 import com.tang.intellij.lua.search.SearchContext
 import com.tang.intellij.lua.stubs.LuaClassMemberStub
@@ -301,13 +303,30 @@ fun getStringValue(valueExpr: PsiElement): String {
     }
     else
     {
-        val tree = LuaDeclarationTree.get(valueExpr.containingFile)
-        val declaration = tree.find(valueExpr as LuaExpr)?.firstDeclaration?.psi
-        val exp = declaration?.parent?.parent
-        if (exp != null)
+        if (valueExpr is LuaNameExpr)
         {
-            val strExp = exp.lastChild.lastChild
-            return getStringValue(strExp)
+            val declaration = resolve(valueExpr as LuaNameExpr, SearchContext.get(valueExpr.project))
+            if (declaration is LuaNameExprImpl)
+            {
+                return declaration.text
+            }
+            else if(declaration is LuaNameDefImpl)
+            {
+                val exp = declaration?.parent?.parent?.lastChild?.lastChild
+                if (exp != null)
+                {
+                    return getStringValue(exp)
+                }
+            }
+        }
+        else if (valueExpr is LuaIndexExpr)
+        {
+            val declaration = resolve(valueExpr as LuaIndexExpr, SearchContext.get(valueExpr.project))
+            val strExp = declaration?.lastChild
+            if (strExp != null)
+            {
+                return getStringValue(strExp)
+            }
         }
     }
 
