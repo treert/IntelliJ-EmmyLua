@@ -236,10 +236,19 @@ fun getFirstStringArg(callExpr: LuaCallExpr): PsiElement? {
             if (expr is LuaLiteralExpr) path = expr
         }
         is LuaListArgs -> args.exprList.let { list ->
-            if (list.isNotEmpty() && list[0] is LuaLiteralExpr) {
-                val valueExpr = list[0] as LuaLiteralExpr
-                if (valueExpr.kind == LuaLiteralKind.String)
-                    path = valueExpr
+            if (list.isNotEmpty()) {
+                if (list[0] is LuaLiteralExpr) {
+                    val valueExpr = list[0] as LuaLiteralExpr
+                    if (valueExpr.kind == LuaLiteralKind.String)
+                        path = valueExpr
+                }
+                else {
+                    val context = SearchContext.get(callExpr.project)
+                    if (list[0].guessType((context)).displayName == "string")
+                    {
+                        path = list[0]
+                    }
+                }
             }
         }
     }
@@ -287,6 +296,18 @@ fun guessTypeAt(list: LuaExprList, context: SearchContext): ITy {
 
 fun getStringValue(typeName: LuaLiteralExpr): String {
     return typeName.stringValue;
+}
+
+fun getNameExprStringValue(valueExpr: PsiElement): String {
+    val tree = LuaDeclarationTree.get(valueExpr.containingFile)
+    val declaration = tree.find(valueExpr as LuaExpr)?.firstDeclaration?.psi
+    val exp = declaration?.parent?.parent
+    if (exp != null)
+    {
+        val str = exp.lastChild.text
+        return str.substring(1, str.length - 1)
+    }
+    return "";
 }
 
 fun newType(typeName: String): ITy {
