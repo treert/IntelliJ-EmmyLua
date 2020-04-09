@@ -94,9 +94,7 @@ open class LuaPsiFile(fileViewProvider: FileViewProvider) : PsiFileBase(fileView
                     if (expr is LuaNameExpr && expr.textMatches(Constants.WORD_MODULE)) {
                         val stringArg = callExpr.firstStringArg
                         if (stringArg != null){
-                            var retStr = stringArg.text.replace("\"", "")
-                            retStr = retStr.replace("'", "")
-                            return retStr
+                            return getStringValue(stringArg)
                         }
                         else{
                             return null

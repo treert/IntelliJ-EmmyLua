@@ -294,28 +294,23 @@ fun guessTypeAt(list: LuaExprList, context: SearchContext): ITy {
     return Ty.UNKNOWN
 }
 
-fun getStringValue(typeName: LuaLiteralExpr): String {
-    return typeName.stringValue;
-}
-
-fun getNameExprStringValue(valueExpr: PsiElement): String {
-    val tree = LuaDeclarationTree.get(valueExpr.containingFile)
-    val declaration = tree.find(valueExpr as LuaExpr)?.firstDeclaration?.psi
-    val exp = declaration?.parent?.parent
-    if (exp != null)
+fun getStringValue(valueExpr: PsiElement): String {
+    if (valueExpr is LuaLiteralExprImpl)
     {
-        val strExp = exp.lastChild.lastChild
-        if(strExp is LuaLiteralExprImpl)
-        {
-            val str = strExp.text
-            return str.substring(1, str.length - 1)
-        }
-        else
-        {
-            return getNameExprStringValue(strExp)
-        }
-
+        return valueExpr.stringValue
     }
+    else
+    {
+        val tree = LuaDeclarationTree.get(valueExpr.containingFile)
+        val declaration = tree.find(valueExpr as LuaExpr)?.firstDeclaration?.psi
+        val exp = declaration?.parent?.parent
+        if (exp != null)
+        {
+            val strExp = exp.lastChild.lastChild
+            return getStringValue(strExp)
+        }
+    }
+
     return "";
 }
 

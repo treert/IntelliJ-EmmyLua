@@ -66,16 +66,7 @@ public class LuaCallExprImpl extends LuaCallExprMixin implements LuaCallExpr {
     String typeName = ty.getDisplayName();
     if(typeName.contains("usefirststring")) {
       PsiElement p = getFirstStringArg();
-      String str = "";
-      if (p instanceof LuaLiteralExpr)
-      {
-        LuaLiteralExpr l = (LuaLiteralExpr) p;
-        str = LuaPsiImplUtilKt.getStringValue(l);
-      }
-      else
-      {
-        str = LuaPsiImplUtilKt.getNameExprStringValue(p);
-      }
+      String str = LuaPsiImplUtilKt.getStringValue(p);
       if (str != "") {
         typeName = typeName.replace("usefirststring", str);
         ty = LuaPsiImplUtilKt.newType(typeName);
