@@ -36,9 +36,7 @@ import com.tang.intellij.lua.comment.psi.LuaDocTagVararg
 import com.tang.intellij.lua.comment.psi.api.LuaComment
 import com.tang.intellij.lua.lang.LuaIcons
 import com.tang.intellij.lua.lang.type.LuaString
-import com.tang.intellij.lua.psi.impl.LuaLiteralExprImpl
-import com.tang.intellij.lua.psi.impl.LuaNameDefImpl
-import com.tang.intellij.lua.psi.impl.LuaNameExprImpl
+import com.tang.intellij.lua.psi.impl.*
 import com.tang.intellij.lua.psi.search.LuaShortNamesManager
 import com.tang.intellij.lua.search.SearchContext
 import com.tang.intellij.lua.stubs.LuaClassMemberStub
@@ -322,10 +320,21 @@ fun getStringValue(valueExpr: PsiElement): String {
         else if (valueExpr is LuaIndexExpr)
         {
             val declaration = resolve(valueExpr as LuaIndexExpr, SearchContext.get(valueExpr.project))
-            val strExp = declaration?.lastChild
-            if (strExp != null)
+            if (declaration is LuaTableFieldImpl)
             {
-                return getStringValue(strExp)
+                val strExp = declaration?.lastChild
+                if (strExp != null)
+                {
+                    return getStringValue(strExp)
+                }
+            }
+            else if (declaration is LuaIndexExprImpl)
+            {
+                val exp = declaration?.parent?.parent?.lastChild?.lastChild
+                if (exp != null)
+                {
+                    return getStringValue(exp)
+                }
             }
         }
     }
