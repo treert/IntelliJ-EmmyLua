@@ -304,8 +304,17 @@ fun getNameExprStringValue(valueExpr: PsiElement): String {
     val exp = declaration?.parent?.parent
     if (exp != null)
     {
-        val str = exp.lastChild.text
-        return str.substring(1, str.length - 1)
+        val strExp = exp.lastChild.lastChild
+        if(strExp is LuaLiteralExprImpl)
+        {
+            val str = strExp.text
+            return str.substring(1, str.length - 1)
+        }
+        else
+        {
+            return getNameExprStringValue(strExp)
+        }
+
     }
     return "";
 }
