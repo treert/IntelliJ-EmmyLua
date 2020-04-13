@@ -64,11 +64,27 @@ public class LuaCallExprImpl extends LuaCallExprMixin implements LuaCallExpr {
   public ITy guessType(SearchContext context) {
     ITy ty = SearchContext.Companion.infer(this, context);
     String typeName = ty.getDisplayName();
-    if(typeName.contains("usefirststring")) {
+    if (typeName.contains("usefirststring")) {
       PsiElement p = getFirstStringArg();
       String str = LuaPsiImplUtilKt.getStringValue(p);
       if (str != "") {
         typeName = typeName.replace("usefirststring", str);
+        ty = LuaPsiImplUtilKt.newType(typeName);
+      }
+    }
+    else if(typeName.contains("usefirstname")) {
+      PsiElement p = getFirstParamArg();
+      String str = LuaPsiImplUtilKt.getParamStringValue(p);
+      if (str != "") {
+        typeName = typeName.replace("usefirstname", str);
+        ty = LuaPsiImplUtilKt.newType(typeName);
+      }
+    }
+    else if(typeName.contains("usefirstallname")) {
+      PsiElement p = getFirstParamArg();
+      String str = LuaPsiImplUtilKt.getParamAllStringValue(p);
+      if (str != "") {
+        typeName = typeName.replace("usefirstallname", str);
         ty = LuaPsiImplUtilKt.newType(typeName);
       }
     }
@@ -79,6 +95,11 @@ public class LuaCallExprImpl extends LuaCallExprMixin implements LuaCallExpr {
   @Nullable
   public PsiElement getFirstStringArg() {
     return LuaPsiImplUtilKt.getFirstStringArg(this);
+  }
+
+  @Nullable
+  public PsiElement getFirstParamArg() {
+    return LuaPsiImplUtilKt.getFirstParamName(this);
   }
 
   public boolean isMethodDotCall() {

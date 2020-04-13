@@ -255,6 +255,36 @@ fun getFirstStringArg(callExpr: LuaCallExpr): PsiElement? {
     return path
 }
 
+/**
+ * 获取第一个参数的名字
+ * @param callExpr callExpr
+ * *
+ * @return String PsiElement
+ */
+fun getFirstParamName(callExpr: LuaCallExpr): PsiElement? {
+    val args = callExpr.args
+    var path: PsiElement? = null
+
+    when (args) {
+        is LuaSingleArg -> {
+            val expr = args.expr
+            if (expr is LuaNameExpr) path = expr
+            if (expr is LuaIndexExpr) path = expr
+        }
+        is LuaListArgs -> args.exprList.let { list ->
+            if (list.isNotEmpty()) {
+                if (list[0] is LuaNameExpr) {
+                    path = list[0]
+                }
+                else if (list[0] is LuaIndexExpr) {
+                    path = list[0]
+                }
+            }
+        }
+    }
+    return path
+}
+
 fun isMethodDotCall(callExpr: LuaCallExpr): Boolean {
     val expr = callExpr.expr
     if (expr is LuaNameExpr)
@@ -339,6 +369,30 @@ fun getStringValue(valueExpr: PsiElement): String {
         }
     }
 
+    return "";
+}
+
+fun getParamStringValue(valueExpr: PsiElement): String {
+    if (valueExpr is LuaNameExpr)
+    {
+        return valueExpr.text;
+    }
+    else if(valueExpr is LuaIndexExpr)
+    {
+        return valueExpr.lastChild.text;
+    }
+    return "";
+}
+
+fun getParamAllStringValue(valueExpr: PsiElement): String {
+    if (valueExpr is LuaNameExpr)
+    {
+        return valueExpr.text;
+    }
+    else if(valueExpr is LuaIndexExpr)
+    {
+        return valueExpr.text;
+    }
     return "";
 }
 
