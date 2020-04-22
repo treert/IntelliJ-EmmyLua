@@ -21,10 +21,7 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiReferenceBase
 import com.tang.intellij.lua.lang.type.LuaString
-import com.tang.intellij.lua.psi.LuaCallExpr
-import com.tang.intellij.lua.psi.LuaExprStat
-import com.tang.intellij.lua.psi.LuaElementFactory
-import com.tang.intellij.lua.psi.resolveRequireFile
+import com.tang.intellij.lua.psi.*
 
 /**
  *
@@ -39,7 +36,7 @@ class LuaRequireReference internal constructor(callExpr: LuaCallExpr) : PsiRefer
 
     init {
         if (path != null && path.textLength > 2) {
-            val text = path.text
+            val text = getStringValue(path)
             val luaString = LuaString.getContent(text)
             pathString = luaString.value
             quot = text.substring(0, luaString.start)
