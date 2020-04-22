@@ -38,9 +38,7 @@ class LuaRequireReference internal constructor(callExpr: LuaCallExpr) : PsiRefer
         if (path != null && path.textLength > 2) {
             val text = getStringValue(path)
             val luaString = LuaString.getContent(text)
-            pathString = luaString.value
-            quot = text.substring(0, luaString.start)
-
+            pathString = text
             if (pathString != null) {
                 val start = path.textOffset - callExpr.textOffset + luaString.start
                 val end = start + pathString!!.length
