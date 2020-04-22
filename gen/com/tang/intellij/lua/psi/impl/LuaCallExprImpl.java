@@ -89,6 +89,10 @@ public class LuaCallExprImpl extends LuaCallExprMixin implements LuaCallExpr {
       }
     }
     ty = TyAliasSubstitutor.Companion.substitute(ty, context);
+    if (ty == null)
+    {
+      ty = getExpr().guessType(context);
+    }
     return ty;
   }
 
