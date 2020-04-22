@@ -12,7 +12,7 @@
 
 Version | CI status
 --------|----------
-IDEA 182+|[![Build status](https://ci.appveyor.com/api/projects/status/a8vv2rgdqbc58hxm?svg=true)](https://ci.appveyor.com/project/ElPsyCongree/intellij-emmylua)
+IDEA 182+|[![Build status](https://ci.appveyor.com/api/projects/status/oayy7ul4qbdqjr8c?svg=true)](https://ci.appveyor.com/project/leinlin/intellij-emmylua)
 
 QQ交流群：1群：`29850775` 2群：`529914962`
 (最新版本以及部分视频演示在群文件中下载)
