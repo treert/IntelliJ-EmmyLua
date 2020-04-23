@@ -22,6 +22,7 @@ import com.intellij.extapi.psi.StubBasedPsiElementBase
 import com.intellij.icons.AllIcons
 import com.intellij.navigation.ItemPresentation
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vcs.history.VcsRevisionNumber
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry
 import com.intellij.psi.search.GlobalSearchScope
@@ -36,6 +37,7 @@ import com.tang.intellij.lua.comment.psi.LuaDocTagVararg
 import com.tang.intellij.lua.comment.psi.api.LuaComment
 import com.tang.intellij.lua.lang.LuaIcons
 import com.tang.intellij.lua.lang.type.LuaString
+import com.tang.intellij.lua.project.LuaSettings
 import com.tang.intellij.lua.psi.impl.*
 import com.tang.intellij.lua.psi.search.LuaShortNamesManager
 import com.tang.intellij.lua.search.SearchContext
@@ -256,6 +258,26 @@ fun getFirstStringArg(callExpr: LuaCallExpr): PsiElement? {
 }
 
 /**
+ * 猜想第二个参数的类型
+ * @param callExpr callExpr
+ * *
+ * @return ITy?
+ */
+fun getSuperType(callExpr: LuaCallExpr, count: Int): ITy? {
+    val args = callExpr.args
+
+    when (args) {
+        is LuaListArgs -> args.exprList.let { list ->
+            if (list.count() >= count) {
+                val context = SearchContext.get(callExpr.project)
+                return list[count - 1].guessType((context))
+            }
+        }
+    }
+    return null
+}
+
+/**
  * 获取第一个参数的名字
  * @param callExpr callExpr
  * *
@@ -396,8 +418,16 @@ fun getParamAllStringValue(valueExpr: PsiElement): String {
     return "";
 }
 
+fun isClassLikeFunctionName(text: String): Boolean {
+    return LuaSettings.isClassLikeFunctionName(text);
+}
+
 fun newType(typeName: String): ITy {
     return TyLazyClass(typeName);
+}
+
+fun newSuperType(typeName: String, superClass: ITy): ITy {
+    return TyLazyClass(typeName).union(superClass)
 }
 
 fun guessParentType(indexExpr: LuaIndexExpr, context: SearchContext): ITy {

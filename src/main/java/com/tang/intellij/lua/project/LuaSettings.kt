@@ -34,6 +34,9 @@ class LuaSettings : PersistentStateComponent<LuaSettings> {
     //自定义require函数，参考constructorNames
     var requireLikeFunctionNames: Array<String> = arrayOf("require")
 
+    //自定义class函数，参考constructorNames
+    var classLikeFunctionNames: Array<String> = arrayOf("class")
+
     var constructorNames: Array<String> = arrayOf("new", "get")
 
     //Doc文档严格模式，对不合法的注解报错
@@ -114,6 +117,10 @@ class LuaSettings : PersistentStateComponent<LuaSettings> {
 
         fun isRequireLikeFunctionName(name: String): Boolean {
             return instance.requireLikeFunctionNames.contains(name) || name == Constants.WORD_REQUIRE
+        }
+
+        fun isClassLikeFunctionName(name: String): Boolean {
+            return instance.classLikeFunctionNames.contains(name) || name == Constants.WORD_CLASS
         }
     }
 }

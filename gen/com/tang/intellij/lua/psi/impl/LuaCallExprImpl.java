@@ -3,6 +3,7 @@ package com.tang.intellij.lua.psi.impl;
 
 import java.util.List;
 
+import com.tang.intellij.lua.project.LuaSettings;
 import com.tang.intellij.lua.ty.TyAliasSubstitutor;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
@@ -88,7 +89,15 @@ public class LuaCallExprImpl extends LuaCallExprMixin implements LuaCallExpr {
         ty = LuaPsiImplUtilKt.newType(typeName);
       }
     }
+    else if (LuaPsiImplUtilKt.isClassLikeFunctionName(getExpr().getText())) {
+      PsiElement p = getFirstStringArg();
+      String str = LuaPsiImplUtilKt.getStringValue(p);
+      if (str != "") {
+        ty = LuaPsiImplUtilKt.newSuperType(str, getClassSuperName());
+      }
+    }
     ty = TyAliasSubstitutor.Companion.substitute(ty, context);
+
     if (ty == null)
     {
       ty = getExpr().guessType(context);
@@ -99,6 +108,11 @@ public class LuaCallExprImpl extends LuaCallExprMixin implements LuaCallExpr {
   @Nullable
   public PsiElement getFirstStringArg() {
     return LuaPsiImplUtilKt.getFirstStringArg(this);
+  }
+
+  @Nullable
+  public ITy getClassSuperName() {
+    return LuaPsiImplUtilKt.getSuperType(this, 2);
   }
 
   @Nullable
