@@ -21,6 +21,7 @@ import com.intellij.psi.*
 import com.intellij.util.ProcessingContext
 import com.tang.intellij.lua.project.LuaSettings
 import com.tang.intellij.lua.psi.*
+import org.jaxen.expr.LiteralExpr
 
 /**
  * reference contributor
@@ -33,6 +34,17 @@ class LuaReferenceContributor : PsiReferenceContributor() {
         psiReferenceRegistrar.registerReferenceProvider(psiElement().withElementType(LuaTypes.NAME_EXPR), NameReferenceProvider())
         psiReferenceRegistrar.registerReferenceProvider(psiElement().withElementType(LuaTypes.GOTO_STAT), GotoReferenceProvider())
         psiReferenceRegistrar.registerReferenceProvider(psiElement().withElementType(LuaTypes.FUNC_DEF), FuncReferenceProvider())
+        psiReferenceRegistrar.registerReferenceProvider(psiElement().withElementType(LuaTypes.LITERAL_EXPR), LiteralReferenceProvider())
+    }
+
+    internal inner class LiteralReferenceProvider : PsiReferenceProvider() {
+        override fun getReferencesByElement(psiElement: PsiElement, processingContext: ProcessingContext): Array<PsiReference> {
+            if (psiElement is LuaLiteralExpr) {
+                if (psiElement.stringValue.contains("/") )
+                    return arrayOf(LuaLiteralReference(psiElement))
+            }
+            return PsiReference.EMPTY_ARRAY
+        }
     }
 
     internal inner class FuncReferenceProvider : PsiReferenceProvider() {
