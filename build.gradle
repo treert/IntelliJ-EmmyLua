@@ -72,4 +72,4 @@ versions.each { shortVer, cfg ->
     }
 }
 
-task buildAll(dependsOn: [build_202])
+task buildAll(dependsOn: [build_201])
