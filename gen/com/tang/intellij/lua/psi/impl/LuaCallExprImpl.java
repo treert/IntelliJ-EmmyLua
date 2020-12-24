@@ -89,6 +89,14 @@ public class LuaCallExprImpl extends LuaCallExprMixin implements LuaCallExpr {
         ty = LuaPsiImplUtilKt.newType(typeName);
       }
     }
+    else if (LuaPsiImplUtilKt.isClassLikeFunctionName(getExpr().getText())) {
+      PsiElement p = getFirstStringArg();
+      String str = LuaPsiImplUtilKt.getStringValue(p);
+      if (str != "") {
+        ty = LuaPsiImplUtilKt.newSuperType(str, getClassSuperName());
+      }
+    }
+
     ty = TyAliasSubstitutor.Companion.substitute(ty, context);
     if (ty == null)
     {

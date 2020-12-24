@@ -21,7 +21,7 @@ import com.intellij.psi.stubs.StubOutputStream
 import com.tang.intellij.lua.search.SearchContext
 
 class TyUnion : Ty(TyKind.Union) {
-    private val childSet = mutableSetOf<ITy>()
+    val childSet = mutableSetOf<ITy>()
 
     fun getChildTypes() = childSet
 
@@ -36,7 +36,7 @@ class TyUnion : Ty(TyKind.Union) {
         return this
     }
 
-    private fun addChild(ty: ITy): Boolean {
+    fun addChild(ty: ITy): Boolean {
         return childSet.add(ty)
     }
 

@@ -427,7 +427,12 @@ fun newType(typeName: String): ITy {
 }
 
 fun newSuperType(typeName: String, superClass: ITy): ITy {
-    return TyLazyClass(typeName).union(superClass)
+    val t = TyLazyClass(typeName)
+    val u = TyUnion()
+    u.addChild(t)
+    u.addChild(superClass)
+
+    return u
 }
 
 fun guessParentType(indexExpr: LuaIndexExpr, context: SearchContext): ITy {
