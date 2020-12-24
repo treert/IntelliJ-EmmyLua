@@ -274,7 +274,11 @@ fun getSuperType(callExpr: LuaCallExpr, count: Int): ITy? {
             }
         }
     }
-    return null
+    return Ty.UNKNOWN
+}
+
+fun checkTyIsNull(ty: ITy?): Boolean {
+    return ty == null || ty == Ty.UNKNOWN
 }
 
 /**

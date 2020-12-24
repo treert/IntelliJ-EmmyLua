@@ -93,7 +93,15 @@ public class LuaCallExprImpl extends LuaCallExprMixin implements LuaCallExpr {
       PsiElement p = getFirstStringArg();
       String str = LuaPsiImplUtilKt.getStringValue(p);
       if (str != "") {
-        ty = LuaPsiImplUtilKt.newSuperType(str, getClassSuperName());
+        ITy spTy = getClassSuperName();
+        if (!LuaPsiImplUtilKt.checkTyIsNull(spTy))
+        {
+          ty = LuaPsiImplUtilKt.newSuperType(str, spTy);
+        }
+        else
+        {
+          ty = LuaPsiImplUtilKt.newType(str);
+        }
       }
     }
 
