@@ -111,4 +111,9 @@ public class LuaLiteralExprImpl extends LuaLiteralExprMixin implements LuaLitera
     ty = TyAliasSubstitutor.Companion.substitute(ty, context);
     return ty;
   }
+
+  @Override
+  public int getWorth() {
+    return 0;
+  }
 }
