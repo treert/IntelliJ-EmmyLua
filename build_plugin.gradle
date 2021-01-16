@@ -218,8 +218,8 @@ task buildPluginWithBunch() {
         // switch
         exec {
             executable isWin ? "bunch/bin/bunch.bat" : "bunch/bin/bunch"
-//            args "switch", ".", IDEA_VER
-            args "cp", ".", IDEA_VER
+            args "switch", ".", IDEA_VER
+//            args "cp", ".", IDEA_VER
         }
         // reset to HEAD
         exec {
