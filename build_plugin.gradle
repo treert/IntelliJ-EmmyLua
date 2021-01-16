@@ -174,9 +174,13 @@ task installEmmyDebugger(type: Copy) {
     destinationDir file("src/main/resources")
 }
 
-File temp_file = new File("$temp/emmy_core.dll")
+File temp_file = new File("$temp/emmy_core.so")
 if(!temp_file.exists()){
+    println("$temp/emmy_core.dll not exists")
     installEmmyDebugger.dependsOn([unzipEmmyDebugger])
+}
+else {
+
 }
 
 buildPlugin.dependsOn([installEmmyDebugger])
@@ -194,7 +198,7 @@ buildPlugin.from(fileTree(dir: RES_DIR, include: '!!DONT_UNZIP_ME!!.txt')) {
 // apply patchs before build plugin
 task buildPluginWithBunch() {
     finalizedBy buildPlugin
-    
+/** 方便快速注释
     doLast {
         // reset
         exec {
@@ -228,4 +232,5 @@ task buildPluginWithBunch() {
             args "reset", rev
         }
     }
+// */
 }
