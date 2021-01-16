@@ -121,7 +121,7 @@ def RES_DIR = "src/main/resources"
 
 buildPlugin.baseName = cfg.archiveName
 
-temp = "temp/debuger_${emmyDebuggerVersion}"
+def temp = "temp/debuger_${emmyDebuggerVersion}"
 
 task downloadEmmyDebugger(type: Download) {
     src ([
@@ -146,7 +146,7 @@ task unzipEmmyDebugger(type: Copy, dependsOn: downloadEmmyDebugger) {
     from(zipTree("$temp/debugger.zip")) {
         into "legacy"
     }
-    destinationDir file("temp")
+    destinationDir file("$temp")
 }
 
 //task installEmmyDebugger(dependsOn: unzipEmmyDebugger, type: Copy) {
@@ -188,39 +188,43 @@ buildPlugin.from(fileTree(dir: RES_DIR, include: '!!DONT_UNZIP_ME!!.txt')) {
     into "/${project.name}"
 }
 
+/**
+ * https://github.com/JetBrains/bunches
+ */
 // apply patchs before build plugin
 task buildPluginWithBunch() {
-    finalizedBy buildPlugin
+//    finalizedBy buildPlugin
     doLast {
         // reset
-//        exec {
-//            executable "git"
-//            args "reset", "HEAD", "--hard"
-//        }
+        exec {
+            executable "git"
+            args "reset", "HEAD", "--hard"
+        }
         // clean untracked files
-//        exec {
-//            executable "git"
-//            args "clean", "-d", "-f"
-//        }
+        exec {
+            executable "git"
+            args "clean", "-d", "-f"
+        }
         // 回滚部分文件
-        def files = "src/main/compat"
-        exec{
-            executable "git"
-            args "restore", "--source=HEAD", "--worktree" , "--", files
-        }
-        exec{
-            executable "git"
-            args "clean", "-df", "--", files
-        }
+//        def files = "src/main/compat"
+//        exec{
+//            executable "git"
+//            args "restore", "--source=HEAD", "--worktree" , "--", files
+//        }
+//        exec{
+//            executable "git"
+//            args "clean", "-df", "--", files
+//        }
         // switch
         exec {
             executable isWin ? "bunch/bin/bunch.bat" : "bunch/bin/bunch"
-            args "switch", ".", IDEA_VER
+//            args "switch", ".", IDEA_VER
+            args "cp", ".", IDEA_VER
         }
         // reset to HEAD
-//        exec {
-//            executable "git"
-//            args "reset", rev
-//        }
+        exec {
+            executable "git"
+            args "reset", rev
+        }
     }
 }
