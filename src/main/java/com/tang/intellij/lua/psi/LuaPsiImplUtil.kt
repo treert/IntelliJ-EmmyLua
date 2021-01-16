@@ -21,21 +21,30 @@ package com.tang.intellij.lua.psi
 import com.intellij.extapi.psi.StubBasedPsiElementBase
 import com.intellij.icons.AllIcons
 import com.intellij.navigation.ItemPresentation
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vcs.history.VcsRevisionNumber
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.SearchScope
 import com.intellij.psi.stubs.StubElement
+import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.util.PsiTreeUtil
+import com.tang.intellij.lua.Constants
 import com.tang.intellij.lua.comment.LuaCommentUtil
 import com.tang.intellij.lua.comment.psi.LuaDocAccessModifier
 import com.tang.intellij.lua.comment.psi.LuaDocTagVararg
 import com.tang.intellij.lua.comment.psi.api.LuaComment
 import com.tang.intellij.lua.lang.LuaIcons
 import com.tang.intellij.lua.lang.type.LuaString
+import com.tang.intellij.lua.project.LuaSettings
+import com.tang.intellij.lua.psi.impl.*
+import com.tang.intellij.lua.psi.search.LuaShortNamesManager
 import com.tang.intellij.lua.search.SearchContext
 import com.tang.intellij.lua.stubs.LuaClassMemberStub
 import com.tang.intellij.lua.stubs.LuaFuncBodyOwnerStub
+import com.tang.intellij.lua.stubs.index.LuaClassMemberIndex
+import com.tang.intellij.lua.stubs.index.StubKeys
 import com.tang.intellij.lua.ty.*
 import java.util.*
 import javax.swing.Icon
@@ -48,6 +57,33 @@ fun setName(owner: PsiNameIdentifierOwner, name: String): PsiElement {
         return newId
     }
     return owner
+}
+
+fun isModuleName(owner: LuaLiteralExprImpl): Boolean {
+    val name = owner.stringValue
+    val context = SearchContext.get(owner.project)
+    val list = LuaShortNamesManager.getInstance(owner.project).getClassMembers("_MODULE", context)
+    for (member in list) {
+        if(member is LuaLiteralExpr && name == member.stringValue) {
+            return true
+        }
+    }
+
+    return false
+}
+
+fun setName(owner: LuaLiteralExprImpl, name: String): PsiElement {
+    val oldId = owner.nameIdentifier
+    if (oldId != null) {
+        val newId = LuaElementFactory.createLiteral(owner.project, "\"" + name + "\"")
+        oldId.replace(newId)
+        return newId
+    }
+    return owner
+}
+
+fun getName(owner: LuaLiteralExprImpl): String {
+    return owner.stringValue
 }
 
 fun getNameIdentifier(nameDef: LuaNameDef): PsiElement {
@@ -185,6 +221,7 @@ fun guessParentType(callExpr: LuaCallExpr, context: SearchContext): ITy {
     return callExpr.expr.guessType(context)
 }
 
+
 /**
  * 获取第一个字符串参数
  * @param callExpr callExpr
@@ -201,10 +238,73 @@ fun getFirstStringArg(callExpr: LuaCallExpr): PsiElement? {
             if (expr is LuaLiteralExpr) path = expr
         }
         is LuaListArgs -> args.exprList.let { list ->
-            if (list.isNotEmpty() && list[0] is LuaLiteralExpr) {
-                val valueExpr = list[0] as LuaLiteralExpr
-                if (valueExpr.kind == LuaLiteralKind.String)
-                    path = valueExpr
+            if (list.isNotEmpty()) {
+                if (list[0] is LuaLiteralExpr) {
+                    val valueExpr = list[0] as LuaLiteralExpr
+                    if (valueExpr.kind == LuaLiteralKind.String)
+                        path = valueExpr
+                }
+                else {
+                    val context = SearchContext.get(callExpr.project)
+                    if (list[0].guessType((context)).displayName == "string")
+                    {
+                        path = list[0]
+                    }
+                }
+            }
+        }
+    }
+    return path
+}
+
+/**
+ * 猜想第二个参数的类型
+ * @param callExpr callExpr
+ * *
+ * @return ITy?
+ */
+fun getSuperType(callExpr: LuaCallExpr, count: Int): ITy? {
+    val args = callExpr.args
+
+    when (args) {
+        is LuaListArgs -> args.exprList.let { list ->
+            if (list.count() >= count) {
+                val context = SearchContext.get(callExpr.project)
+                return list[count - 1].guessType((context))
+            }
+        }
+    }
+    return Ty.UNKNOWN
+}
+
+fun checkTyIsNull(ty: ITy?): Boolean {
+    return ty == null || ty == Ty.UNKNOWN
+}
+
+/**
+ * 获取第一个参数的名字
+ * @param callExpr callExpr
+ * *
+ * @return String PsiElement
+ */
+fun getFirstParamName(callExpr: LuaCallExpr): PsiElement? {
+    val args = callExpr.args
+    var path: PsiElement? = null
+
+    when (args) {
+        is LuaSingleArg -> {
+            val expr = args.expr
+            if (expr is LuaNameExpr) path = expr
+            if (expr is LuaIndexExpr) path = expr
+        }
+        is LuaListArgs -> args.exprList.let { list ->
+            if (list.isNotEmpty()) {
+                if (list[0] is LuaNameExpr) {
+                    path = list[0]
+                }
+                else if (list[0] is LuaIndexExpr) {
+                    path = list[0]
+                }
             }
         }
     }
@@ -250,7 +350,111 @@ fun guessTypeAt(list: LuaExprList, context: SearchContext): ITy {
     return Ty.UNKNOWN
 }
 
+fun getStringValue(valueExpr: PsiElement): String {
+    if (valueExpr is LuaLiteralExprImpl)
+    {
+        return valueExpr.stringValue
+    }
+    else
+    {
+        if (valueExpr is LuaNameExpr)
+        {
+            val declaration = resolve(valueExpr as LuaNameExpr, SearchContext.get(valueExpr.project))
+            if (declaration is LuaNameExprImpl)
+            {
+                return declaration.text
+            }
+            else if(declaration is LuaNameDefImpl)
+            {
+                val exp = declaration?.parent?.parent?.lastChild?.lastChild
+                if (exp != null)
+                {
+                    return getStringValue(exp)
+                }
+            }
+        }
+        else if (valueExpr is LuaIndexExpr)
+        {
+            val declaration = resolve(valueExpr as LuaIndexExpr, SearchContext.get(valueExpr.project))
+            if (declaration is LuaTableFieldImpl)
+            {
+                val strExp = declaration?.lastChild
+                if (strExp != null)
+                {
+                    return getStringValue(strExp)
+                }
+            }
+            else if (declaration is LuaIndexExprImpl)
+            {
+                val exp = declaration?.parent?.parent?.lastChild?.lastChild
+                if (exp != null)
+                {
+                    return getStringValue(exp)
+                }
+            }
+        }
+    }
+
+    return "";
+}
+
+fun getParamStringValue(valueExpr: PsiElement): String {
+    if (valueExpr is LuaNameExpr)
+    {
+        return valueExpr.text;
+    }
+    else if(valueExpr is LuaIndexExpr)
+    {
+        return valueExpr.lastChild.text;
+    }
+    return "";
+}
+
+fun getParamAllStringValue(valueExpr: PsiElement): String {
+    if (valueExpr is LuaNameExpr)
+    {
+        return valueExpr.text;
+    }
+    else if(valueExpr is LuaIndexExpr)
+    {
+        return valueExpr.text;
+    }
+    return "";
+}
+
+fun isClassLikeFunctionName(text: String): Boolean {
+    return LuaSettings.isClassLikeFunctionName(text);
+}
+
+fun newType(typeName: String): ITy {
+    return TyLazyClass(typeName);
+}
+
+fun newSuperType(typeName: String, superClass: ITy): ITy {
+    val t = TyLazyClass(typeName)
+    val u = TyUnion()
+    u.addChild(t)
+    u.addChild(superClass)
+
+    return u
+}
+
 fun guessParentType(indexExpr: LuaIndexExpr, context: SearchContext): ITy {
+    if (indexExpr.name != null) {
+        val iName = indexExpr.name.toString()
+        val name = indexExpr.text.toString().replace("." + iName, "")
+        val list = LuaShortNamesManager.getInstance(indexExpr.project).getClassMembers("_MODULE", context)
+        var isModuleExpr = false
+        for (member in list) {
+            if(member is LuaLiteralExpr && name == member.stringValue) {
+                isModuleExpr = true
+                break
+            }
+        }
+        if (isModuleExpr) {
+            return TyLazyClass(name.toString())
+        }
+    }
     val expr = PsiTreeUtil.getStubChildOfType(indexExpr, LuaExpr::class.java)
     return expr?.guessType(context) ?: Ty.UNKNOWN
 }
@@ -450,6 +654,13 @@ fun getNameIdentifier(tableField: LuaTableField): PsiElement? {
     if (id != null)
         return id
     return tableField.idExpr
+}
+
+fun getNameIdentifier(literalExpr: LuaLiteralExprImpl): PsiElement? {
+    val id = literalExpr.id
+    if (id != null)
+        return id
+    return null
 }
 
 fun guessParentType(tableField: LuaTableField, context: SearchContext): ITy {

@@ -21,10 +21,7 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiReferenceBase
 import com.tang.intellij.lua.lang.type.LuaString
-import com.tang.intellij.lua.psi.LuaCallExpr
-import com.tang.intellij.lua.psi.LuaExprStat
-import com.tang.intellij.lua.psi.LuaElementFactory
-import com.tang.intellij.lua.psi.resolveRequireFile
+import com.tang.intellij.lua.psi.*
 
 /**
  *

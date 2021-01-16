@@ -71,6 +71,11 @@ open class LuaPsiFile(fileViewProvider: FileViewProvider) : PsiFileBase(fileView
             return if (stub != null) stub.module else findCachedModuleName()
         }
 
+    val moduleSeeAll: Boolean
+        get(){
+            return findCachedModuleSeeAll() == "true"
+        }
+
     /**
      * Lua language version
      */
@@ -99,8 +104,12 @@ open class LuaPsiFile(fileViewProvider: FileViewProvider) : PsiFileBase(fileView
                     val expr = callExpr?.expr
                     if (expr is LuaNameExpr && expr.textMatches(Constants.WORD_MODULE)) {
                         val stringArg = callExpr.firstStringArg
-                        if (stringArg != null)
-                            return stringArg.text
+                        if (stringArg != null){
+                            return getStringValue(stringArg)
+                        }
+                        else{
+                            return null
+                        }
                     }
                 }
             }
@@ -109,7 +118,44 @@ open class LuaPsiFile(fileViewProvider: FileViewProvider) : PsiFileBase(fileView
         return null
     }
 
+    private fun findCachedModuleSeeAll(): String? {
+        return CachedValuesManager.getCachedValue(this, KEY_CACHED_MODULE_SEEALL) {
+            CachedValueProvider.Result.create(findModuleSeeAll(), this)
+        }
+    }
+
+    private fun findModuleSeeAll():String? {
+        var child: PsiElement? = firstChild
+        var isSeeAll = "false"
+        while (child != null) {
+            if (child is LuaStatement) {
+                if (child is LuaExprStat) { // module("name")
+                    val callExpr = child.expr as? LuaCallExpr
+                    val expr = callExpr?.expr
+                    if (expr is LuaNameExpr && expr.textMatches(Constants.WORD_MODULE)) {
+                        val stringArg = callExpr.firstStringArg
+                        if(callExpr.children.lastIndex >= 1){
+                            val tmpPsi = callExpr.children[1]
+                            if(tmpPsi.children.lastIndex >= 1){
+                                val methodName = tmpPsi.children[1].text
+                                if(methodName == "package.seeall"){
+                                    isSeeAll = "true"
+                                }
+                            }
+                        }
+                        if (stringArg != null){
+                            return isSeeAll
+                        }
+                    }
+                }
+            }
+            child = child.nextSibling
+        }
+        return isSeeAll
+    }
+
     companion object {
         private val KEY_CACHED_MODULE_NAME = Key.create<CachedValue<String?>>("lua.file.module.name")
+        private val KEY_CACHED_MODULE_SEEALL = Key.create<CachedValue<String?>>("lua.file.module.seeall")
     }
 }

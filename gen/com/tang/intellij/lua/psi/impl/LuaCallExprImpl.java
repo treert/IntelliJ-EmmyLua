@@ -2,6 +2,9 @@
 package com.tang.intellij.lua.psi.impl;
 
 import java.util.List;
+
+import com.tang.intellij.lua.project.LuaSettings;
+import com.tang.intellij.lua.ty.TyAliasSubstitutor;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
@@ -54,13 +57,76 @@ public class LuaCallExprImpl extends LuaCallExprMixin implements LuaCallExpr {
   @Override
   @NotNull
   public ITy guessParentType(@NotNull SearchContext context) {
-    return LuaPsiImplUtilKt.guessParentType(this, context);
+    ITy t = LuaPsiImplUtilKt.guessParentType(this, context);
+    return t;
   }
 
   @Override
+  @NotNull
+  public ITy guessType(SearchContext context) {
+    ITy ty = SearchContext.Companion.infer(this, context);
+    String typeName = ty.getDisplayName();
+    if (typeName.contains("usefirststring")) {
+      PsiElement p = getFirstStringArg();
+      String str = LuaPsiImplUtilKt.getStringValue(p);
+      if (str != "") {
+        typeName = typeName.replace("usefirststring", str);
+        ty = LuaPsiImplUtilKt.newType(typeName);
+      }
+    }
+    else if(typeName.contains("usefirstname")) {
+      PsiElement p = getFirstParamArg();
+      String str = LuaPsiImplUtilKt.getParamStringValue(p);
+      if (str != "") {
+        typeName = typeName.replace("usefirstname", str);
+        ty = LuaPsiImplUtilKt.newType(typeName);
+      }
+    }
+    else if(typeName.contains("usefirstallname")) {
+      PsiElement p = getFirstParamArg();
+      String str = LuaPsiImplUtilKt.getParamAllStringValue(p);
+      if (str != "") {
+        typeName = typeName.replace("usefirstallname", str);
+        ty = LuaPsiImplUtilKt.newType(typeName);
+      }
+    }
+    else if (LuaPsiImplUtilKt.isClassLikeFunctionName(getExpr().getText())) {
+      PsiElement p = getFirstStringArg();
+      String str = LuaPsiImplUtilKt.getStringValue(p);
+      if (str != "") {
+        ITy spTy = getClassSuperName();
+        if (!LuaPsiImplUtilKt.checkTyIsNull(spTy))
+        {
+          ty = LuaPsiImplUtilKt.newSuperType(str, spTy);
+        }
+        else
+        {
+          ty = LuaPsiImplUtilKt.newType(str);
+        }
+      }
+    }
+
+    ty = TyAliasSubstitutor.Companion.substitute(ty, context);
+    if (ty == null)
+    {
+      ty = getExpr().guessType(context);
+    }
+    return ty;
+  }
+
   @Nullable
   public PsiElement getFirstStringArg() {
     return LuaPsiImplUtilKt.getFirstStringArg(this);
+  }
+
+  @Nullable
+  public ITy getClassSuperName() {
+    return LuaPsiImplUtilKt.getSuperType(this, 2);
+  }
+
+  @Nullable
+  public PsiElement getFirstParamArg() {
+    return LuaPsiImplUtilKt.getFirstParamName(this);
   }
 
   @Override

@@ -103,3 +103,9 @@
 ---@class void
 
 ---@class self
+
+---@class usefirststring
+
+---@class usefirstname
+
+---@class usefirstallname

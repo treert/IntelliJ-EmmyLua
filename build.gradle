@@ -85,7 +85,9 @@ versions.each { shortVer, cfg ->
     }
 }
 
-task buildAll(dependsOn: [build_201, build_202, build_203])
+// task buildAll(dependsOn: [build_201, build_202, build_203])
+// 203 版本似乎用的java11了。
+task buildAll(dependsOn: [build_202])
 
 dependencies {
     compile fileTree(dir: "libs", includes: ["*.jar"])
