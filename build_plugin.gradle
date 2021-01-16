@@ -121,57 +121,66 @@ def RES_DIR = "src/main/resources"
 
 buildPlugin.baseName = cfg.archiveName
 
+temp = "temp/debuger_${emmyDebuggerVersion}"
+
 task downloadEmmyDebugger(type: Download) {
     src ([
             "https://github.com/EmmyLua/EmmyLuaDebugger/releases/download/${emmyDebuggerVersion}/emmy_core.so",
             "https://github.com/EmmyLua/EmmyLuaDebugger/releases/download/${emmyDebuggerVersion}/emmy_core.dylib",
-            "https://github.com/leinlin/EmmyLuaDebugger/releases/download/${emmyDebuggerVersion}/emmy_core@x64.zip",
+            "https://github.com/EmmyLua/EmmyLuaDebugger/releases/download/${emmyDebuggerVersion}/emmy_core@x64.zip",
             "https://github.com/EmmyLua/EmmyLuaDebugger/releases/download/${emmyDebuggerVersion}/emmy_core@x86.zip",
             "https://github.com/EmmyLua/EmmyLuaLegacyDebugger/releases/download/${emmyLegacyDebuggerVersion}/debugger.zip"
     ])
-    dest "temp"
+    dest "$temp"
 }
 
 task unzipEmmyDebugger(type: Copy, dependsOn: downloadEmmyDebugger) {
-    from(zipTree("temp/emmy_core@x64.zip")) {
+    from(zipTree("$temp/emmy_core@x64.zip")) {
         //include "emmy_core.dll"
         into "x64"
     }
-    from(zipTree("temp/emmy_core@x86.zip")) {
+    from(zipTree("$temp/emmy_core@x86.zip")) {
         //include "emmy_core.dll"
         into "x86"
     }
-    from(zipTree("temp/debugger.zip")) {
+    from(zipTree("$temp/debugger.zip")) {
         into "legacy"
     }
     destinationDir file("temp")
 }
 
-task installEmmyDebugger(dependsOn: unzipEmmyDebugger, type: Copy) {
-    from("temp/x64/") {
+//task installEmmyDebugger(dependsOn: unzipEmmyDebugger, type: Copy) {
+task installEmmyDebugger(type: Copy) {
+    from("$temp/x64/") {
         //include "emmy_core.dll"
         into "debugger/emmy/windows/x64"
     }
-    from("temp/x86/") {
+    from("$temp/x86/") {
         //include "emmy_core.dll"
         into "debugger/emmy/windows/x86"
     }
-    from("temp") {
+    from("$temp") {
         include "emmy_core.so"
         into "debugger/emmy/linux"
     }
-    from("temp") {
+    from("$temp") {
         include "emmy_core.dylib"
         into "debugger/emmy/mac"
     }
-    from("temp/legacy") {
-        include "**/*"
+    from("$temp/legacy") {
+//        include "**/*"
         into "debugger/windows"
     }
     destinationDir file("src/main/resources")
 }
 
+File temp_file = new File("$temp/emmy_core.dll")
+if(!temp_file.exists()){
+    installEmmyDebugger.dependsOn([unzipEmmyDebugger])
+}
+
 buildPlugin.dependsOn([installEmmyDebugger])
+
 buildPlugin.from(fileTree(dir: RES_DIR, includes: ['debugger/**'])) {
     into "/${project.name}/classes/"
 }
@@ -184,14 +193,24 @@ task buildPluginWithBunch() {
     finalizedBy buildPlugin
     doLast {
         // reset
-        exec {
-            executable "git"
-            args "reset", "HEAD", "--hard"
-        }
+//        exec {
+//            executable "git"
+//            args "reset", "HEAD", "--hard"
+//        }
         // clean untracked files
-        exec {
+//        exec {
+//            executable "git"
+//            args "clean", "-d", "-f"
+//        }
+        // 回滚部分文件
+        def files = "src/main/compat"
+        exec{
             executable "git"
-            args "clean", "-d", "-f"
+            args "restore", "--source=HEAD", "--worktree" , "--", files
+        }
+        exec{
+            executable "git"
+            args "clean", "-df", "--", files
         }
         // switch
         exec {
@@ -199,9 +218,9 @@ task buildPluginWithBunch() {
             args "switch", ".", IDEA_VER
         }
         // reset to HEAD
-        exec {
-            executable "git"
-            args "reset", rev
-        }
+//        exec {
+//            executable "git"
+//            args "reset", rev
+//        }
     }
 }
