@@ -38,6 +38,7 @@ fun <T : PsiElement> createLineMarkerInfo(
         icon,
         tooltipProvider,
         navigationHandler,
-        alignment
+        alignment,
+        accessibleNameProvider
     )
 }
