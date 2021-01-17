@@ -90,8 +90,13 @@ fun resolve(nameExpr: LuaNameExpr, context: SearchContext): PsiElement? {
 
     //global
     if (resolveResult == null || resolveResult is LuaNameExpr) {
-        val refName = nameExpr.name
-        val moduleName = nameExpr.moduleName ?: Constants.WORD_G
+//        val refName = nameExpr.name
+//        val moduleName = nameExpr.moduleName ?: Constants.WORD_G
+
+        val target = (resolveResult as? LuaNameExpr) ?: nameExpr
+        val refName = target.name
+
+        val moduleName = target.moduleName ?: Constants.WORD_G
 
         // 如果不是_G并且seeall了就再找一遍
         if(moduleName != Constants.WORD_G && nameExpr.moduleSeeAll) {
