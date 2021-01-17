@@ -198,7 +198,7 @@ buildPlugin.from(fileTree(dir: RES_DIR, include: '!!DONT_UNZIP_ME!!.txt')) {
 // apply patchs before build plugin
 task buildPluginWithBunch() {
     finalizedBy buildPlugin
-//* 方便快速注释
+/* 方便快速注释
     doLast {
         // reset
         exec {
