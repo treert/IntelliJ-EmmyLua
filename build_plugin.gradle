@@ -198,7 +198,7 @@ buildPlugin.from(fileTree(dir: RES_DIR, include: '!!DONT_UNZIP_ME!!.txt')) {
 // apply patchs before build plugin
 task buildPluginWithBunch() {
     finalizedBy buildPlugin
-/** 方便快速注释
+//* 方便快速注释
     doLast {
         // reset
         exec {
@@ -210,7 +210,7 @@ task buildPluginWithBunch() {
             executable "git"
             args "clean", "-d", "-f"
         }
-        // 回滚部分文件
+        // 回滚部分文件，叹气，这个傻叉bunch，会操作git库。一定要回滚。
 //        def files = "src/main/compat"
 //        exec{
 //            executable "git"

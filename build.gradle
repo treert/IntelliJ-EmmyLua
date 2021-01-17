@@ -34,44 +34,45 @@ versions["202"] = [
     archiveName: "IntelliJ-EmmyLua",
     targetCompatibilityLevel: 8
 ]
-versions["201"] = [
-    ideaSDKVersion: "IC-201.8743.12",
-    sinceBuild: "201",
-    untilBuild: "201.*",
-    archiveName: "IntelliJ-EmmyLua",
-    targetCompatibilityLevel: 8
-]
-versions["193"] = [
-    ideaSDKVersion: "IC-193.5233.102",
-    sinceBuild: "193",
-    untilBuild: "194.*",
-    archiveName: "IntelliJ-EmmyLua",
-    targetCompatibilityLevel: 8
-]
-versions["182"] = [
-    ideaSDKVersion: "IC-182.2371.4",
-    sinceBuild: "182",
-    untilBuild: "193.*",
-    archiveName: "IntelliJ-EmmyLua",
-    explicitJavaDependency: "false",
-    targetCompatibilityLevel: 8
-]
-versions["172"] = [
-    ideaSDKVersion: "IC-172.4574.19",
-    sinceBuild: "172",
-    untilBuild: "181.*",
-    archiveName: "IntelliJ-EmmyLua",
-    explicitJavaDependency: "false",
-    targetCompatibilityLevel: 8
-]
-versions["171"] = [
-    ideaSDKVersion: "IC-171.4694.73",
-    sinceBuild: "171",
-    untilBuild: "171.*",
-    archiveName: "IntelliJ-EmmyLua",
-    explicitJavaDependency: "false",
-    targetCompatibilityLevel: 8
-]
+// 自己编译的，之前的就不管了，不然代码提示里有些奇怪的错误
+//versions["201"] = [
+//    ideaSDKVersion: "IC-201.8743.12",
+//    sinceBuild: "201",
+//    untilBuild: "201.*",
+//    archiveName: "IntelliJ-EmmyLua",
+//    targetCompatibilityLevel: 8
+//]
+//versions["193"] = [
+//    ideaSDKVersion: "IC-193.5233.102",
+//    sinceBuild: "193",
+//    untilBuild: "194.*",
+//    archiveName: "IntelliJ-EmmyLua",
+//    targetCompatibilityLevel: 8
+//]
+//versions["182"] = [
+//    ideaSDKVersion: "IC-182.2371.4",
+//    sinceBuild: "182",
+//    untilBuild: "193.*",
+//    archiveName: "IntelliJ-EmmyLua",
+//    explicitJavaDependency: "false",
+//    targetCompatibilityLevel: 8
+//]
+//versions["172"] = [
+//    ideaSDKVersion: "IC-172.4574.19",
+//    sinceBuild: "172",
+//    untilBuild: "181.*",
+//    archiveName: "IntelliJ-EmmyLua",
+//    explicitJavaDependency: "false",
+//    targetCompatibilityLevel: 8
+//]
+//versions["171"] = [
+//    ideaSDKVersion: "IC-171.4694.73",
+//    sinceBuild: "171",
+//    untilBuild: "171.*",
+//    archiveName: "IntelliJ-EmmyLua",
+//    explicitJavaDependency: "false",
+//    targetCompatibilityLevel: 8
+//]
 
 versions.each { shortVer, cfg ->
     task "build_${shortVer}"(type: GradleBuild) {
@@ -102,12 +103,12 @@ sourceSets {
     }
 }
 
-def developVersion = "203"
+def developVersion = "202"
 
 intellij {
-    type 'IU'
+//    type 'IU'
     updateSinceUntilBuild false
     downloadSources false
     version = versions[developVersion].ideaSDKVersion
-    localPath System.getenv("IDEA_HOME_${developVersion}")
+//    localPath System.getenv("IDEA_HOME_${developVersion}")
 }
