@@ -105,11 +105,11 @@ public class LuaLiteralExprImpl extends LuaLiteralExprMixin implements LuaLitera
   @NotNull
   @Override
   public ITy guessParentType(@NotNull SearchContext context) {
-
-    String name = LuaPsiImplUtilKt.getName(this);
-    ITy ty = SearchContext.Companion.NewTyClass((name));
-    ty = TyAliasSubstitutor.Companion.substitute(ty, context);
-    return ty;
+      return null;
+//    String name = LuaPsiImplUtilKt.getName(this);
+//    ITy ty = SearchContext.Companion.NewTyClass((name));
+//    ty = TyAliasSubstitutor.Companion.substitute(ty, context);
+//    return ty;
   }
 
   @Override

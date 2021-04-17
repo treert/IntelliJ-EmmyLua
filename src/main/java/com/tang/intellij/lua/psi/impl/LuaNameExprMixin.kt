@@ -21,6 +21,7 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiReference
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.tree.IElementType
+import com.tang.intellij.lua.Constants
 import com.tang.intellij.lua.psi.*
 import com.tang.intellij.lua.search.SearchContext
 import com.tang.intellij.lua.stubs.LuaNameExprStub
@@ -46,7 +47,7 @@ abstract class LuaNameExprMixin : StubBasedPsiElementBase<LuaNameExprStub>, LuaE
     override fun guessParentType(context: SearchContext): ITy {
         //todo: model type
         // 不知道这段逻辑最后会起到什么作用，先这么着吧
-        if(this.moduleName != null){
+        if(this.moduleName != null && this.moduleName != Constants.WORD_G){
             return TyLazyClass(this.moduleName.toString())
         }
         return Ty.UNKNOWN
