@@ -10,7 +10,9 @@ import com.tang.intellij.lua.comment.psi.LuaDocPsiImplUtilKt;
 import com.tang.intellij.lua.search.SearchContext;
 import com.tang.intellij.lua.stubs.LuaExprStubElement;
 import com.tang.intellij.lua.ty.ITy;
+import com.tang.intellij.lua.ty.Ty;
 import com.tang.intellij.lua.ty.TyAliasSubstitutor;
+import com.tang.intellij.lua.ty.TyClass;
 import kotlin.reflect.jvm.internal.impl.resolve.constants.StringValue;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
@@ -82,27 +84,26 @@ public class LuaLiteralExprImpl extends LuaLiteralExprMixin implements LuaLitera
     return LuaPsiImplUtilKt.isModuleName(this);
   }
 
-  @NotNull
   @Override
   public ITy guessType(@NotNull SearchContext context) {
-    Boolean isModule = LuaPsiImplUtilKt.isModuleName(this);
-    String name = LuaPsiImplUtilKt.getName(this);
-
-    if(isModule)
-    {
-      ITy ty = SearchContext.Companion.NewTyClass(name);
-      ty = TyAliasSubstitutor.Companion.substitute(ty, context);
-      return ty;
-    }
-    else
-    {
-      ITy ty = SearchContext.Companion.infer(this, context);
-      ty = TyAliasSubstitutor.Companion.substitute(ty, context);
-      return ty;
-    }
+    return Ty.Companion.getSTRING();
+//    Boolean isModule = LuaPsiImplUtilKt.isModuleName(this);
+//    String name = LuaPsiImplUtilKt.getName(this);
+//
+//    if(isModule)
+//    {
+//      ITy ty = SearchContext.Companion.NewTyClass(name);
+//      ty = TyAliasSubstitutor.Companion.substitute(ty, context);
+//      return ty;
+//    }
+//    else
+//    {
+//      ITy ty = SearchContext.Companion.infer(this, context);
+//      ty = TyAliasSubstitutor.Companion.substitute(ty, context);
+//      return ty;
+//    }
   }
 
-  @NotNull
   @Override
   public ITy guessParentType(@NotNull SearchContext context) {
       return null;

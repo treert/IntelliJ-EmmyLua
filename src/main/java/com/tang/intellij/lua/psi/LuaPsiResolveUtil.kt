@@ -90,15 +90,11 @@ fun resolve(nameExpr: LuaNameExpr, context: SearchContext): PsiElement? {
 
     //global
     if (resolveResult == null || resolveResult is LuaNameExpr) {
-//        val refName = nameExpr.name
-//        val moduleName = nameExpr.moduleName ?: Constants.WORD_G
-
         val target = (resolveResult as? LuaNameExpr) ?: nameExpr
         val refName = target.name
-
         val moduleName = target.moduleName ?: Constants.WORD_G
 
-        // 如果不是_G并且seeall了就再找一遍
+        // 如果不是_G并且seeall了就再找一遍，这个放在后面竟然会出错。头疼
         if(moduleName != Constants.WORD_G && nameExpr.moduleSeeAll) {
             LuaClassMemberIndex.process(Constants.WORD_G, refName, context, Processor {
                 resolveResult = it
@@ -125,6 +121,11 @@ fun multiResolve(ref: LuaNameExpr, context: SearchContext): Array<PsiElement> {
         val refName = ref.name
         val module = ref.moduleName ?: Constants.WORD_G
 
+        LuaClassMemberIndex.process(module, refName, context, Processor {
+            list.add(it)
+            true
+        })
+
         // 如果不是_G并且seeall了就再找一遍
         if(module != Constants.WORD_G && ref.moduleSeeAll) {
             LuaClassMemberIndex.process(Constants.WORD_G, refName, context, Processor {
@@ -132,11 +133,6 @@ fun multiResolve(ref: LuaNameExpr, context: SearchContext): Array<PsiElement> {
                 true
             })
         }
-
-        LuaClassMemberIndex.process(module, refName, context, Processor {
-            list.add(it)
-            true
-        })
     }
     return list.toTypedArray()
 }

@@ -47,7 +47,7 @@ abstract class LuaNameExprMixin : StubBasedPsiElementBase<LuaNameExprStub>, LuaE
     override fun guessParentType(context: SearchContext): ITy {
         //todo: model type
         // 不知道这段逻辑最后会起到什么作用，先这么着吧
-        if(this.moduleName != null && this.moduleName != Constants.WORD_G){
+        if(this.moduleName != null && this.moduleName != Constants.WORD_G && this.assignStat != null){
             return TyLazyClass(this.moduleName.toString())
         }
         return Ty.UNKNOWN

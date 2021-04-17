@@ -181,6 +181,7 @@ abstract class TyClass(override val className: String,
     }
 
     companion object {
+
         // for _G
         val G: TyClass = createSerializedClass(Constants.WORD_G)
 
