@@ -21,14 +21,12 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiReference
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.tree.IElementType
-import com.tang.intellij.lua.psi.LuaClassField
-import com.tang.intellij.lua.psi.LuaClassMember
-import com.tang.intellij.lua.psi.LuaExpr
-import com.tang.intellij.lua.psi.Visibility
+import com.tang.intellij.lua.psi.*
 import com.tang.intellij.lua.search.SearchContext
 import com.tang.intellij.lua.stubs.LuaNameExprStub
 import com.tang.intellij.lua.ty.ITy
 import com.tang.intellij.lua.ty.Ty
+import com.tang.intellij.lua.ty.TyLazyClass
 
 /**
 
@@ -47,6 +45,10 @@ abstract class LuaNameExprMixin : StubBasedPsiElementBase<LuaNameExprStub>, LuaE
 
     override fun guessParentType(context: SearchContext): ITy {
         //todo: model type
+        // 不知道这段逻辑最后会起到什么作用，先这么着吧
+        if(this.moduleName != null){
+            return TyLazyClass(this.moduleName.toString())
+        }
         return Ty.UNKNOWN
     }
 

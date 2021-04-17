@@ -28,7 +28,7 @@ versions["203"] = [
     targetCompatibilityLevel: 11
 ]
 versions["202"] = [
-    ideaSDKVersion: "IC-202.6397.94",
+    ideaSDKVersion: "IC-202.7660.26",
     sinceBuild: "202",
     untilBuild: "202.*",
     archiveName: "IntelliJ-EmmyLua",

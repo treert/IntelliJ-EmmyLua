@@ -208,6 +208,10 @@ fun getPresentation(funcDef: LuaFuncDef): ItemPresentation {
 }
 
 fun guessParentType(funcDef: LuaFuncDef, searchContext: SearchContext): ITyClass {
+    var moduleName = funcDef.moduleName
+    if(moduleName != null && moduleName != Constants.WORD_G/*&& moduleName.startsWith("ModuleMgr.")*/){
+        return TyLazyClass(moduleName);
+    }
     return TyClass.G
 }
 
